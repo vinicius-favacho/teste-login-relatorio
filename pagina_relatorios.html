@@ -1,97 +1,373 @@
+não está aparecendo o campo de selecionar feriados e nem está sendo gerado a tabela:
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantidade de Relatórios Emitidos</title>
-    <script>
-        function calcularTotal() {
-            var total = 0;
-            var meses = ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-            meses.forEach(function(mes) {
-                var quantidade = parseInt(document.getElementById(mes).value) || 0;
-                total += quantidade;
-                document.getElementById(mes + '-total').innerText = quantidade;
-            });
-            document.getElementById('total').innerText = total;
-        }
-    </script>
-    <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        th, td {
-            border: 1px solid #dddddd;
-            text-align: center;
-            padding: 8px;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Frequência</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    #container {
+        border: 1px solid black; /* Adiciona uma borda ao redor do container */
+        padding: 10px; /* Adiciona um espaçamento interno ao container */
+    }
+    #container2{
+        border: 1px solid black; /* Adiciona uma borda ao redor do container */
+        padding: 15px; /* Adiciona um espaçamento interno ao container */
+        line-height: 0.2;
+    }
+    #cabecalho img {
+        width: 900px; /* Ajuste o tamanho da imagem conforme necessário */
+        margin-top: 0px;
+        float: left; /* Alinha a imagem para a esquerda */
+        margin-right: 0px; /* Adiciona um espaçamento à direita da imagem */
+    }
+    #cabecalho img {
+        width: 100px;
+        margin-top: 0px;
+    }
+    #informacoes {
+        margin-bottom: 5px;
+    }
+    #informacoes p {
+        margin: 5px 0;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: smaller; /* Diminui o tamanho da fonte na tabela */
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 3px; /* Reduz o espaçamento interno das células */
+        text-align: center;
+        height: 8px; /* Diminui a altura das células */
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    .page-break {
+        page-break-before: always; /* Quebra de página antes da tabela */
+        margin-bottom: 0; /* Adicione a margem inferior desejada */       
+    }
+    /* Ajuste de tamanho para os cabeçalhos */
+    #cabecalho h2 {
+        font-size: 14px; /* Você pode ajustar o tamanho conforme necessário */
+        line-height: 0.2; /* Adicione o espaçamento entre as linhas desejado aqui */
+        text-align: center;
+    }
+
+    /* Reduz a margem inferior entre os elementos h2 */
+    .h2-group:last-child {
+        margin-bottom: 3px; /* Ajuste o valor conforme necessário */
+    }
+    #cabecalho p {
+    font-weight: bold;
+    }
+    #informacoes p:last-child {
+        font-weight: bold;
+        font-size: smaller;
+        text-decoration: underline;
+        margin-top: 0px; /* Ajuste conforme necessário para posicionar o parágrafo bem em cima da tabela */
+    }
+    #cabecalho {
+        margin-bottom: 0; /* Remove a margem inferior */
+    }
+    #folha {
+        margin-top: 0; /* Ajuste o espaçamento superior conforme necessário */
+    }
+    
+</style>
 </head>
 <body>
-    <h2>Quantidade de Relatórios Emitidos</h2>
-    <form>
-        <label for="janeiro">Janeiro:</label>
-        <input type="number" id="janeiro" name="janeiro" onchange="calcularTotal()"><br>
 
-        <label for="fevereiro">Fevereiro:</label>
-        <input type="number" id="fevereiro" name="fevereiro" onchange="calcularTotal()"><br>
+<div id="container"> <!-- Container para circundar tudo com um quadrado -->
+    <h2>Folha de Frequência</h2>
 
-        <label for="marco">Março:</label>
-        <input type="number" id="marco" name="marco" onchange="calcularTotal()"><br>
+    <label for="mes">Selecione o mês:</label>
+    <select id="mes">
+        <option value="1">JANEIRO</option>
+        <option value="2">FEVEREIRO</option>
+        <option value="3">MARÇO</option>
+        <option value="4">ABRIL</option>
+        <option value="5">MAIO</option>
+        <option value="6">JUNHO</option>
+        <option value="7">JULHO</option>
+        <option value="8">AGOSTO</option>
+        <option value="9">SETEMBRO</option>
+        <option value="10">OUTUBRO</option>
+        <option value="11">NOVEMBRO</option>
+        <option value="12">DEZEMBRO</option>
+    </select>
 
-        <label for="abril">Abril:</label>
-        <input type="number" id="abril" name="abril" onchange="calcularTotal()"><br>
+    <button onclick="gerarFolha()">Gerar Folha</button>
 
-        <label for="maio">Maio:</label>
-        <input type="number" id="maio" name="maio" onchange="calcularTotal()"><br>
+    <div id="feriados">
+        <h2>Selecione os Dias de Feriado</h2>
+    </div>
+</div> <!-- Fim do container -->
 
-        <label for="junho">Junho:</label>
-        <input type="number" id="junho" name="junho" onchange="calcularTotal()"><br>
+<p id="ubm">UBM: <span id="ubm"></span></p>
+<p id="voluntario">VOLUNTÁRIO CIVIL: <span id="voluntario"></span></p>
+<p id="funcao">FUNÇÃO: <span id="funcao"></span></p>
+<p id="secao">SEÇÃO: <span id="secao"></span></p>
+<p id="horario">HORÁRIO: <span id="horario"></span></p>
+<p>Nome: <input type="text" id="nome" oninput="atualizarCampo(this.value, 'nome')"> </p>
+<p>UBM: <input type="text" id="ubmInput" oninput="atualizarCampo(this.value, 'ubm')"> </p>
+<p>Voluntário Civil: <input type="text" id="voluntarioInput" oninput="atualizarCampo(this.value, 'voluntario')"> </p>
+<p>Função: <input type="text" id="funcaoInput" oninput="atualizarCampo(this.value, 'funcao')"> </p>
+<p>Seção: <input type="text" id="secaoInput" oninput="atualizarCampo(this.value, 'secao')"> </p>
+<p>Horário: <input type="text" id="horarioInput" oninput="atualizarCampo(this.value, 'horario')"> </p>
 
-        <label for="julho">Julho:</label>
-        <input type="number" id="julho" name="julho" onchange="calcularTotal()"><br>
+    <div class="page-break"></div>
 
-        <label for="agosto">Agosto:</label>
-        <input type="number" id="agosto" name="agosto" onchange="calcularTotal()"><br>
 
-        <label for="setembro">Setembro:</label>
-        <input type="number" id="setembro" name="setembro" onchange="calcularTotal()"><br>
+    
+    <div id="cabecalho">
+        <img src="image1.png">
+        <h2>GOVERNO DO ESTADO DO PARÁ</h2>
+        <h2>CORPO DE BOMBEIROS MILITAR DO PARÁ</h2>
+        <h2>COORDENADORIA ESTADUAL DE DEFESA CIVIL</h2>
+        <h2>GABINETE DO SUBCOMANDO GERAL</h2>
+        <div style="display: flex; justify-content: space-between;">
+            <div style="text-align: right;">
+                <p>MÊS: <span id="nomeMes"></span></p>
+            </div>
+            <div style="text-align: right;">
+                <p>ANO: <span id="ano">2024</span></p>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between;margin-top: -25px;">
+            <div style="text-align: right;">
+                <p>UBM: <span id="ubm">Quartel do Comando Geral</span></p>
+            </div>
+            <div style="text-align: right;">
+                <p>SEÇÃO: <span id="secao">GABINETE DO SUBCOMANDO</span></p>
+            </div>
+        </div>
+    </div>
+    <div style="text-align: left;font-weight: bold;margin-top: -10px;">
+        <p>VOLUNTÁRIO CIVIL: <span id="voluntario"></span></p>
+    </div>
+    <div style="text-align: left;font-weight: bold;margin-top: -10px;">
+        <p>FUNÇÃO: <span id="funcao"></span></p>
+    </div>
+    <div style="text-align: right;font-weight: bold;margin-top: -10px;">
+        <p>HORÁRIO: <span id="funcao"></span></p>
+    </div>
+    <div id="informacoes">
+        <p style="font-weight: bold; font-size: smaller; margin-top: -10px; margin-bottom: -4px;">
+            CARGA HORÁRIA SEMANAL DE 30 HORAS, CONFORME PORTARIA Nº 617 DE 08 DE agosto de 2018
+        </p>
+    </div>
 
-        <label for="outubro">Outubro:</label>
-        <input type="number" id="outubro" name="outubro" onchange="calcularTotal()"><br>
-
-        <label for="novembro">Novembro:</label>
-        <input type="number" id="novembro" name="novembro" onchange="calcularTotal()"><br>
-
-        <label for="dezembro">Dezembro:</label>
-        <input type="number" id="dezembro" name="dezembro" onchange="calcularTotal()"><br>
-
-        <p>Total: <span id="total">0</span></p>
-    </form>
-
-    <h3>Tabela de Quantidade de Relatórios por Mês</h3>
-    <table>
+    <table id="folha">
         <tr>
-            <th>Mês</th>
-            <th>Quantidade</th>
+            <th>Dia</th>
+            <th>Assinatura</th>
+            <th>Entrada</th>
+            <th>Saída</th>
+            <th>Visto Responsável</th>
         </tr>
-        <tr><td>Janeiro</td><td id="janeiro-total">0</td></tr>
-        <tr><td>Fevereiro</td><td id="fevereiro-total">0</td></tr>
-        <tr><td>Março</td><td id="marco-total">0</td></tr>
-        <tr><td>Abril</td><td id="abril-total">0</td></tr>
-        <tr><td>Maio</td><td id="maio-total">0</td></tr>
-        <tr><td>Junho</td><td id="junho-total">0</td></tr>
-        <tr><td>Julho</td><td id="julho-total">0</td></tr>
-        <tr><td>Agosto</td><td id="agosto-total">0</td></tr>
-        <tr><td>Setembro</td><td id="setembro-total">0</td></tr>
-        <tr><td>Outubro</td><td id="outubro-total">0</td></tr>
-        <tr><td>Novembro</td><td id="novembro-total">0</td></tr>
-        <tr><td>Dezembro</td><td id="dezembro-total">0</td></tr>
-         <tr><td>Total</td><td id="total">0</td></tr>
     </table>
-</body>
-</html>
+
+    <div style="display: flex; justify-content: space-between;">
+        <span style="margin-right: auto;">Atrasos: <input type="text" id="atrasos"></span>
+        <span style="margin-left: auto;">Faltas: <input type="text" id="faltas"></span>
+    </div>
+
+    <div style="margin-top: 20px; border-top: 1px solid black; padding-top: 5px;">
+        <p style="text-align: center; font-weight: bold;">ASSINATURA DO COMANDANTE</p>
+    </div>
+
+
+
+
+    <div class="page-break"></div> <!-- Fim da página -->
+    <div id="cabecalho">
+        <img src="image1.png">
+        <h2>GOVERNO DO ESTADO DO PARÁ</h2>
+        <h2>CORPO DE BOMBEIROS MILITAR DO PARÁ</h2>
+        <h2>COORDENADORIA ESTADUAL DE DEFESA CIVIL</h2>
+        <h2>GABINETE DO SUBCOMANDO GERAL</h2>
+        <div style="display: flex; justify-content: space-between;">
+
+        </div>
+    </div>
+
+    <div id="informacoes">
+        <p style="font-weight: bold; font-size: medium; margin-top: 10px; margin-bottom: -4px; text-align:center; margin-left: 4px">
+            FICHA DE ACOMPANHAMENTO E AVALIAÇÃO INSTITUCIONAL
+        </p>
+    </div>
+
+    <div id="container2"> <!-- Container para circundar tudo com um quadrado -->
+        <div style="text-align: left;font-weight: bold;font-size: smaller;margin: 0px;margin-top: -20px;margin-bottom: -20px">
+            <p>UBM: <span id="ubm"></span></p>
+            <p>COMANDANTE: <span id="comandante"></span></p>
+            <p>CHEFE IMEDIATO/RESPONSÁVEL: <span id="chefe_imediato"></span></p>
+            <p>VOLUNTÁRIO CIVIL: <span id="voluntario"></span></p>
+        </div>
+    </div> <!-- Fim do container -->
+
+    <div id="container"> <!-- Container para circundar tudo com um quadrado -->
+        <p style="font-weight: bold; font-size: medium; margin-top: 0px; margin-bottom: -4px; text-align:center; margin-left: 4px">
+            ASPECTOS GERAIS A SEREM OBSERVADOS MENSALMENTE
+        </p>
+    </div> <!-- Fim do container -->
+    <div id="container2"> <!-- Container para circundar tudo com um quadrado -->
+        <div style="text-align: left;font-weight: bold;font-size: medium;margin: 0px;margin-top: -20px;margin-bottom: -20px;font-size: 15px">
+            <p>A - Pontualidade; </p>
+            <p>B - Assiduidade;</p>
+            <p>C - Cumprimento;</p>
+            <p>D - Cumprimento integral de carga horária diária; </p>
+            <p>E - Qualidade dos serviços prestados; </p>
+            <p>F - Adaptação às normas da instituição; </p>
+            <p>G - Comunicabilidade; </p>
+            <p>H - Sociabilidade (relacionamento interpessoal, integração grupal, adaptação ao ambiente...)</p>
+            <p>I - Dinamismo (motivação, interesse, iniciativa, criatividade...); </p>
+        </div>
+    </div> <!-- Fim do container -->
+
+    <div id="container"> <!-- Container para circundar tudo com um quadrado -->
+        <p style="font-weight: bold; font-size: medium; margin-top: 7px; margin-bottom: 7px; text-align:center; margin-left: 4px">
+            AVALIAÇÃO DE DESEMPENHO MENSAL
+        </p>
+    </div> <!-- Fim do container -->
+
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <form id="qualityForm">
+    <table>
+      <thead>
+        <tr>
+          <th>QUALIDADE</th>
+          <th>A</th>
+          <th>B</th>
+          <th>C</th>
+          <th>D</th>
+          <th>E</th>
+          <th>F</th>
+          <th>G</th>
+          <th>H</th>
+          <th>I</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>EXCELENTE</td>
+          <td><input type="checkbox" name="excelente_A"></td>
+          <td><input type="checkbox" name="excelente_B"></td>
+          <td><input type="checkbox" name="excelente_C"></td>
+          <td><input type="checkbox" name="excelente_D"></td>
+          <td><input type="checkbox" name="excelente_E"></td>
+          <td><input type="checkbox" name="excelente_F"></td>
+          <td><input type="checkbox" name="excelente_G"></td>
+          <td><input type="checkbox" name="excelente_H"></td>
+          <td><input type="checkbox" name="excelente_I"></td>
+        </tr>
+        <tr>
+          <td>BOM</td>
+          <td><input type="checkbox" name="bom_A"></td>
+          <td><input type="checkbox" name="bom_B"></td>
+          <td><input type="checkbox" name="bom_C"></td>
+          <td><input type="checkbox" name="bom_D"></td>
+          <td><input type="checkbox" name="bom_E"></td>
+          <td><input type="checkbox" name="bom_F"></td>
+          <td><input type="checkbox" name="bom_G"></td>
+          <td><input type="checkbox" name="bom_H"></td>
+          <td><input type="checkbox" name="bom_I"></td>
+        </tr>
+        <tr>
+          <td>REGULAR</td>
+          <td><input type="checkbox" name="regular_A"></td>
+          <td><input type="checkbox" name="regular_B"></td>
+          <td><input type="checkbox" name="regular_C"></td>
+          <td><input type="checkbox" name="regular_D"></td>
+          <td><input type="checkbox" name="regular_E"></td>
+          <td><input type="checkbox" name="regular_F"></td>
+          <td><input type="checkbox" name="regular_G"></td>
+          <td><input type="checkbox" name="regular_H"></td>
+          <td><input type="checkbox" name="regular_I"></td>
+        </tr>
+        <tr>
+          <td>INSATISFATÓRIO</td>
+          <td><input type="checkbox" name="insatisfatorio_A"></td>
+          <td><input type="checkbox" name="insatisfatorio_B"></td>
+          <td><input type="checkbox" name="insatisfatorio_C"></td>
+          <td><input type="checkbox" name="insatisfatorio_D"></td>
+          <td><input type="checkbox" name="insatisfatorio_E"></td>
+          <td><input type="checkbox" name="insatisfatorio_F"></td>
+          <td><input type="checkbox" name="insatisfatorio_G"></td>
+          <td><input type="checkbox" name="insatisfatorio_H"></td>
+          <td><input type="checkbox" name="insatisfatorio_I"></td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+</div>
+<div id="container"> <!-- Container para circundar tudo com um quadrado -->
+    <p style="font-weight: bold; font-size: medium; margin-top: 0px; margin-bottom: 80px; text-align:left; margin-left: 4px">
+        OBSERVAÇÕES COMPLEMENTARES:
+    </p>
+</div> <!-- Fim do container -->
+<div style="margin-top: 300px; border-top: 1px solid black; padding-top: 5px;">
+    <p style="text-align: center; font-weight: bold;">ASSINATURA DO COMANDANTE</p>
+</div>
+
+<script>
+    window.onload = function() {
+        var divFeriados = document.getElementById("feriados");
+        divFeriados.innerHTML = "<h2>Selecione os Dias de Feriado</h2>";
+        for (var dia = 1; dia <= 31; dia++) {
+            var checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = "feriado" + dia;
+            checkbox.value = dia;
+            checkbox.name = "feriados";
+            checkbox.addEventListener("change", gerarFolha); // Adiciona o evento de escuta para atualizar a folha de frequência
+            var label = document.createElement("label");
+            label.htmlFor = "feriado" + dia;
+            label.appendChild(document.createTextNode(dia));
+
+            divFeriados.appendChild(checkbox);
+            divFeriados.appendChild(label);
+        }
+
+        // Atualiza o nome do mês ao carregar a página
+        var nomeMes = document.getElementById("mes").options[document.getElementById("mes").selectedIndex].text;
+        document.getElementById("nomeMes").textContent = nomeMes;
+    };
+function atualizarCampo(valor, campo) {
+    document.getElementById(campo).textContent = valor;
+}
+
+    function gerarFolha() {
+        var mes = document.getElementById("mes").value;
+        var nomeMes = document.getElementById("mes").options[mes - 1].text; // Obtém o nome do mês selecionado
+        document.getElementById("nomeMes").textContent = nomeMes; // Atualiza o nome do mês na página
+
+        var diasNoMes = new Date(2024, mes, 0).getDate(); // Obtém o número de dias no mês selecionado
+        var table = document.getElementById("folha");
+
+        // Limpa a tabela antes de gerar uma nova folha
+        table.innerHTML = "";
+        table.insertAdjacentHTML("beforeend", "<tr><th>Dia</th><th>Assinatura</th><th>Entrada</th><th>Saída</th><th>Visto Responsável</th></tr>");
+
+        for (var dia = 1; dia <= diasNoMes; dia++) {
+            var data = new Date(2024, mes - 1, dia);
+            var diaSemana = data.getDay();
+
+            // Verifica se é sábado, domingo, ou feriado
+            if (diaSemana === 0 || diaSemana === 6 || document.getElementById("feriado" + dia).checked) { // Domingo, sábado ou feriado
+                table.insertAdjacentHTML("beforeend", `<tr><td>${dia}</td><td>${diaSemana === 0 ? "DOMINGO" : diaSemana === 6 ? "SÁBADO" : "FERIADO"}</td><td>------</td><td>------</td><td>------</td></tr>`);
+            } else {
+                table.insertAdjacentHTML("beforeend", `<tr><td>${dia}</td><td></td><td></td><td></td><td></td></tr>`);
+            }
+        }
+    }
+</script>
