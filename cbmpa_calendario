@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CALENDÁRIO CBMPA 2024</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #FF0000;
+            color: white;
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .month {
+            margin: 10px;
+            background-color: white;
+            color: black;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+        .birthday {
+            background-color: #FF0000;
+            color: white;
+        }
+        h2 {
+            text-transform: uppercase;
+        }
+        #confettiContainer {
+            position: relative;
+            width: 100%;
+            height: 150px; /* Altura do espaço para o confete */
+            background-color: #FF0000;
+            overflow: hidden;
+        }
+        #confettiMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="confettiContainer">
+        <div id="confettiMessage"></div>
+    </div>
+    <h1>CALENDÁRIO CBMPA 2024</h1>
+    <div id="calendar"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script>
+        const birthdays = {
+            "08-01": ["VC TAYSSA"],
+            "11-01": ["CB EDILENA"],
+            "20-01": ["VC ANA PAULA"],
+            "25-01": ["VC LUIZ FELIPE"],
+            "30-01": ["VC ANTONIO RAFAEL"],
+            "02-02": ["1º SGT DILCINEI"],
+            "05-02": ["CEL TORRES"],
+            "09-02": ["VC JULLY", "VC ADRIANO"],
+            "10-02": ["VC REBECA"],
+            "12-02": ["2º SGT CHAGAS"],
+            "13-02": ["3º SGT J. FERREIRA"],
+            "21-02": ["TEN REINALDO"],
+            "06-03": ["VC ANA CLARA DANTAS"],
+            "07-03": ["3º SGT ALEXANDRE"],
+            "08-03": ["VC ADRYA"],
+            "14-03": ["TCEL ARTEAGA"],
+            "16-03": ["VC CINDY"],
+            "26-03": ["TEN NAILA"],
+            "29-03": ["CB CARDOSO"],
+            "08-04": ["VC RAYANE"],
+            "09-04": ["VC ELTON"],
+            "15-04": ["SUB TEN FIGUEIREDO"],
+            "17-04": ["VC ANA BEATRIZ"],
+            "18-04": ["VC THAISE"],
+            "06-05": ["3º SGT ALAN"],
+            "14-05": ["CAP REZENDE"],
+            "17-05": ["3º SGT CLEITON"],
+            "20-05": ["VC WANRLEY"],
+            "21-05": ["VC LUCAS DUARTE"],
+            "29-05": ["VC YNGRID"],
+            "10-06": ["SUB TEN ARRAES"],
+            "13-06": ["VC JAMILLY"],
+            "21-06": ["RAFAEL"],
+            "25-06": ["VC CAMILLE"],
+            "29-06": ["VC DAHAS"],
+            "01-07": ["MAJ RODRIGO"],
+            "05-07": ["3º SGT J. CUNHA"],
+            "21-07": ["TEN MEIRELES"],
+            "22-07": ["TCEL ERIVALDO"],
+            "30-07": ["CB COSTA"],
+            "02-08": ["TCEL DUARTE", "TCEL CEZAR"],
+            "05-08": ["3º SGT CRISTILENE"],
+            "13-08": ["3º SGT NASCIMENTO"],
+            "23-08": ["3º SGT AGNALDO"],
+            "26-08": ["CB CLEIDES"],
+            "30-08": ["VC WELLINGTON"],
+            "03-09": ["3º SGT CAVALCANTI"],
+            "04-09": ["CB CAMPELO"],
+            "07-09": ["VC GIOVANE"],
+            "10-09": ["TEN ROBSON"],
+            "20-09": ["VC CHRISTIAN", "3º SGT MELEM"],
+            "22-09": ["CB RAFAEL"],
+            "23-09": ["VC LUANA", "TEN ELIAS"],
+            "25-09": ["SD TRINDADE"],
+            "29-09": ["CB LAYSE"],
+            "05-10": ["TEN ALEIXO"],
+            "09-10": ["TCEL BRUNO"],
+            "10-10": ["CAP ROGÉRIO"],
+            "16-10": ["VC LORENA"],
+            "24-10": ["YASMIN STEFANIE"],
+            "25-10": ["VC FAVACHO", "3º SGT LINHARES"],
+            "30-10": ["VC BRUNA"],
+            "08-11": ["YASMIN BRAGA"],
+            "09-11": ["CEL HELTON", "VC ANA CLARA MIRANDA"],
+            "14-11": ["CB MACIEL", "TEN ADRIELLY"],
+            "15-11": ["VC LAISI", "VC MARCOS GABRIEL"],
+            "20-11": ["VC VITÓRIA"],
+            "22-11": ["3º SGT DORIL"],
+            "29-11": ["3º SGT WILLIAMS"],
+            "09-12": ["VC JEAN"],
+            "10-12": ["2º SGT ALDINEY", "VC GUILHERME"],
+            "12-12": ["VC HEITOR"],
+            "17-12": ["VC LAISSA"],
+            "18-12": ["CB VINICIUS"],
+            "23-12": ["CB BITENCORT"],
+            "27-12": ["SUB TEN MORAES"],
+            "28-12": ["VC LUCAS"]
+        };
+
+        function generateCalendar(year) {
+            const calendarDiv = document.getElementById('calendar');
+            for (let quarter = 0; quarter < 4; quarter++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+
+                for (let monthOffset = 0; monthOffset < 3; monthOffset++) {
+                    const month = quarter * 3 + monthOffset;
+                    const monthDiv = document.createElement('div');
+                    monthDiv.className = 'month';
+                    const monthName = new Date(year, month).toLocaleString('default', { month: 'long' }).toUpperCase();
+                    const birthdayList = document.createElement('ul');
+                    birthdayList.id = `birthdays-${month}`;
+                    monthDiv.innerHTML = `<h2>${monthName}</h2>`;
+                    monthDiv.appendChild(birthdayList);
+
+                    const table = document.createElement('table');
+                    const firstDay = new Date(year, month, 1).getDay();
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                    let date = 1;
+
+                    // Create table header
+                    const headerRow = document.createElement('tr');
+                    ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].forEach(day => {
+                        const th = document.createElement('th');
+                        th.innerText = day;
+                        headerRow.appendChild(th);
+                    });
+                    table.appendChild(headerRow);
+
+                    // Create table rows
+                    for (let i = 0; i < 6; i++) {
+                        const row = document.createElement('tr');
+                        for (let j = 0; j < 7; j++) {
+                            const cell = document.createElement('td');
+                            if (i === 0 && j < firstDay) {
+                                cell.innerHTML = '';
+                            } else if (date > daysInMonth) {
+                                break;
+                            } else {
+                                const dateStr = `${date.toString().padStart(2, '0')}-${(month + 1).toString().padStart(2, '0')}`;
+                                cell.innerHTML = date;
+                                if (birthdays[dateStr]) {
+                                    cell.classList.add('birthday');
+                                    birthdays[dateStr].forEach(person => {
+                                        const listItem = document.createElement('li');
+                                        listItem.innerHTML = `<strong>${date}</strong> - ${person}`; // Inclui a data do aniversário
+                                        birthdayList.appendChild(listItem);
+                                    });
+                                }
+                                date++;
+                            }
+                            row.appendChild(cell);
+                        }
+                        table.appendChild(row);
+                    }
+                    monthDiv.appendChild(table);
+                    rowDiv.appendChild(monthDiv);
+                }
+                calendarDiv.appendChild(rowDiv);
+            }
+        }
+
+        function showBirthdayMessage() {
+            const today = new Date();
+            const dateStr = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}`;
+            if (birthdays[dateStr]) {
+                const confettiMessageDiv = document.getElementById('confettiMessage');
+                confettiMessageDiv.innerText = `Feliz aniversário ${birthdays[dateStr].join(' e ')}!`;
+                animateConfetti();
+            }
+        }
+
+        function animateConfetti() {
+            let params = {
+                particleCount: 500, // Quantidade de confetes
+                spread: 90, // O quanto eles se espalham
+                startVelocity: 70, // Velocidade inicial
+                origin: { x: 0, y: 0.5 }, // Posição inicial na tela
+                angle: 45 // Ângulo em que os confetes serão lançados
+            };
+
+            // Joga confetes da esquerda pra direita
+            confetti(params);
+
+            // Joga confetes da direita para a esquerda
+            params.origin.x = 1;
+            params.angle = 135;
+            confetti(params);
+        }
+
+        generateCalendar(2024);
+        showBirthdayMessage();
+    </script>
+</body>
+</html>
