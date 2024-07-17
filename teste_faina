@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets Data</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dados da Planilha do Google</h1>
+    <table id="data-table">
+        <tbody>
+            <!-- Dados serão inseridos aqui -->
+        </tbody>
+    </table>
+    
+    <h1>Tabela de Voluntários</h1>
+    <table id="schedule-table">
+        <thead>
+            <tr>
+                <th>Dia</th>
+                <th>Manhã</th>
+                <th>Tarde</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dados serão inseridos aqui -->
+        </tbody>
+    </table>
+
+    <script>
+        async function fetchData() {
+            const sheetID = '13AIdYHhCUMNYTcw_aTk-_8gV5GRs9A1LbKw8Sf76n4M'; // Substitua pelo ID da sua planilha
+            const apiKey = 'AIzaSyArHuaVW_xoZkXSgudW1nxFfQydNQI4_K4';       // Substitua pela sua chave de API
+            const range = 'VOLUNTÁRIOS!A1:E';  // Ajuste o intervalo conforme necessário
+
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${range}?key=${apiKey}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayData(data);
+                generateSchedule(data.values);
+            } catch (error) {
+                console.error('Erro ao buscar os dados da planilha:', error);
+            }
+        }
+
+        function displayData(data) {
+            const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+            data.values.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                row.forEach((cell, cellIndex) => {
+                    const td = document.createElement(rowIndex === 0 ? 'th' : 'td');
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+        }
+
+        function generateSchedule(data) {
+            const days = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+            const schedule = [];
+            const lastSections = { "MANHÃ": "", "TARDE": "" };
+
+            // Extrai voluntários da planilha e organiza por turno
+            const volunteers = data.slice(1).map(row => ({
+                nome: row[0],
+                turno: row[1],
+                setor: row[2],
+                indice: row[3],
+                nfaina: row[4]
+            }));
+
+            const morningVolunteers = volunteers.filter(v => v.turno === "MANHÃ");
+            const afternoonVolunteers = volunteers.filter(v => v.turno === "TARDE");
+
+            const usedVolunteers = { "MANHÃ": new Set(), "TARDE": new Set() };
+
+            days.forEach(day => {
+                let morningVolunteer, afternoonVolunteer;
+
+                // Seleciona voluntário da manhã evitando repetição de setor e nome
+                do {
+                    morningVolunteer = morningVolunteers[Math.floor(Math.random() * morningVolunteers.length)];
+                } while (morningVolunteer.setor === lastSections["MANHÃ"] || usedVolunteers["MANHÃ"].has(morningVolunteer.nfaina));
+                lastSections["MANHÃ"] = morningVolunteer.setor;
+                usedVolunteers["MANHÃ"].add(morningVolunteer.nfaina);
+
+                // Seleciona voluntário da tarde evitando repetição de setor e nome
+                do {
+                    afternoonVolunteer = afternoonVolunteers[Math.floor(Math.random() * afternoonVolunteers.length)];
+                } while (afternoonVolunteer.setor === lastSections["TARDE"] || usedVolunteers["TARDE"].has(afternoonVolunteer.nfaina));
+                lastSections["TARDE"] = afternoonVolunteer.setor;
+                usedVolunteers["TARDE"].add(afternoonVolunteer.nfaina);
+
+                schedule.push({
+                    day,
+                    morning: morningVolunteer.nfaina,
+                    afternoon: afternoonVolunteer.nfaina
+                });
+            });
+
+            displaySchedule(schedule);
+        }
+
+        function displaySchedule(schedule) {
+            const table = document.getElementById('schedule-table').getElementsByTagName('tbody')[0];
+            schedule.forEach(entry => {
+                const row = table.insertRow();
+                row.insertCell(0).innerText = entry.day;
+                row.insertCell(1).innerText = entry.morning;
+                row.insertCell(2).innerText = entry.afternoon;
+            });
+        }
+
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
